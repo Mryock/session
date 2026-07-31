@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BENZO-MD • Pair Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --neon: #00ff88;
+      --neon2: #00ccff;
+      --neon3: #ff00ff;
+      --text: #e8eaf0;
+      --muted: rgba(232,234,240,0.35);
+      --glow: 0 0 30px rgba(0,255,136,0.1);
+    }
+
+    html { width: 100%; min-height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(150px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%);
+      top: -300px; left: -300px;
+      animation: drift1 20s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,204,255,0.07), transparent 70%);
+      bottom: -200px; right: -200px;
+      animation: drift2 25s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,0,255,0.06), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: drift3 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 { to { transform: translate(120px, 100px); } }
+    @keyframes drift2 { to { transform: translate(-100px, -120px); } }
+    @keyframes drift3 { to { transform: translate(-50%, -50%) scale(1.5); } }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(48px, 8vh, 80px) clamp(16px, 4vw, 32px) clamp(48px, 8vh, 80px);
+      width: 100%;
+      max-width: 580px;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--neon);
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.15);
+      padding: 8px 24px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.1s;
+      backdrop-filter: blur(10px);
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.2s;
+    }
+
+    .brand-name {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #00ff88 0%, #00ccff 40%, #ff00ff 70%, #00ff88 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(9px, 1.8vw, 11px);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .brand-sub span {
+      color: var(--neon);
+      font-weight: 400;
+    }
+
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+      margin: 24px auto 32px;
+      border-radius: 4px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.25s;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.35s;
+      transition: border-color 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent 60%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .card-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── INPUT ROW ── */
+    .input-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .input-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--neon);
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    .phone-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 16px 16px 38px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text);
+      outline: none;
+      transition: all 0.3s ease;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .phone-input::-webkit-outer-spin-button,
+    .phone-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .phone-input::placeholder { 
+      color: rgba(232,234,240,0.15);
+      font-size: 12px;
+    }
+
+    .phone-input:focus {
+      border-color: rgba(0,255,136,0.35);
+      background: rgba(0,255,136,0.04);
+      box-shadow: 0 0 0 4px rgba(0,255,136,0.06);
+    }
+
+    .phone-input.error {
+      border-color: rgba(255,80,80,0.4);
+      background: rgba(255,80,80,0.04);
+      box-shadow: 0 0 0 4px rgba(255,80,80,0.06);
+    }
+
+    .submit-btn {
+      padding: 16px 28px;
+      background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,204,255,0.08));
+      border: 1px solid rgba(0,255,136,0.2);
+      border-radius: 14px;
+      color: var(--neon);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: rgba(0,255,136,0.18);
+      border-color: rgba(0,255,136,0.4);
+      box-shadow: 0 0 40px rgba(0,255,136,0.08);
+      transform: translateY(-2px);
+    }
+
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+
+    .submit-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ── STATUS AREA ── */
+    .status {
+      margin-top: 24px;
+      min-height: 48px;
+    }
+
+    .status-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-msg.error { color: rgba(255,100,100,0.8); }
+    .status-msg.success { color: var(--neon); }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(0,255,136,0.1);
+      border-top-color: var(--neon);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── CODE BOX ── */
+    .code-box {
+      margin-top: 24px;
+      background: rgba(0,255,136,0.04);
+      border: 1px solid rgba(0,255,136,0.12);
+      border-radius: 18px;
+      padding: 28px 24px;
+      text-align: center;
+      animation: fadeUp 0.5s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .code-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0,255,136,0.03), transparent);
+      pointer-events: none;
+    }
+
+    .code-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .code-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(24px, 7vw, 34px);
+      font-weight: 500;
+      letter-spacing: 8px;
+      color: var(--neon);
+      margin-bottom: 18px;
+      word-break: break-all;
+      text-shadow: 0 0 40px rgba(0,255,136,0.1);
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.15);
+      border-radius: 100px;
+      color: var(--neon);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: rgba(0,255,136,0.12);
+      border-color: rgba(0,255,136,0.3);
+      box-shadow: 0 0 30px rgba(0,255,136,0.06);
+      transform: scale(1.02);
+    }
+
+    .copy-btn.copied {
+      color: #fff;
+      background: rgba(0,255,136,0.18);
+      border-color: rgba(0,255,136,0.4);
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      margin-top: 36px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      color: rgba(232,234,240,0.15);
+      letter-spacing: 3px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.6s;
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid transparent;
+    }
+
+    .back-link:hover {
+      color: var(--neon);
+      border-color: rgba(0,255,136,0.1);
+      background: rgba(0,255,136,0.03);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      color: rgba(232,234,240,0.08);
+      letter-spacing: 2px;
+      text-align: center;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.7s;
+    }
+
+    .footer a {
+      color: rgba(0,255,136,0.2);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer a:hover { color: var(--neon); }
+
+    @media (max-width: 480px) {
+      .input-row { flex-direction: column; }
+      .submit-btn { width: 100%; padding: 16px; justify-content: center; }
+      .card { padding: 28px 20px; }
+      .code-box { padding: 22px 16px; }
+      .code-value { letter-spacing: 4px; }
+    }
+
+    @media (max-width: 360px) {
+      .badge { font-size: 8px; padding: 6px 16px; letter-spacing: 2px; }
+      .card { padding: 20px 14px; }
+      .phone-input { font-size: 12px; padding: 14px 14px 14px 34px; }
+      .input-prefix { font-size: 12px; left: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="wrapper">
+    <div class="badge">✦ BENZO-MD PAIR ✦</div>
+
+    <div class="brand">
+      <div class="brand-name">BENZO    MD</div>
+      <div class="brand-sub">Multi-Device <span>✦</span> WhatsApp Bot</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+      <div class="card-title">🔑 Link Your Device</div>
+      <div class="card-hint">Enter your phone number with country code (no + or spaces)</div>
+
+      <div class="input-row">
+        <div class="input-wrap">
+          <span class="input-prefix">+</span>
+          <input
+            class="phone-input"
+            id="number"
+            type="number"
+            placeholder="254759XXXXXX"
+            autocomplete="tel"
+          >
+        </div>
+        <button class="submit-btn" id="submit">Get Code</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div id="code-area"></div>
+    </div>
+
+    <a class="back-link" href="/">← back to home</a>
+
+    <div class="footer">
+      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a> • Made with Chaos by Amon 💀
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    const numInput  = document.getElementById('number');
+    const submitBtn = document.getElementById('submit');
+    const statusEl  = document.getElementById('status');
+    const codeArea  = document.getElementById('code-area');
+
+    function setStatus(msg, type = '') {
+      const icon = type === 'loading'
+        ? '<div class="spinner"></div>'
+        : type === 'error' ? '✕' : type === 'success' ? '✓' : '';
+      statusEl.innerHTML = msg
+        ? `<div class="status-msg ${type}">${icon}<span>${msg}</span></div>`
+        : '';
+    }
+
+    function showCode(code) {
+      codeArea.innerHTML = `
+        <div class="code-box">
+          <div class="code-label">✦ Your Pair Code ✦</div>
+          <div class="code-value" id="code-val">${code}</div>
+          <button class="copy-btn" id="copy-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy Code
+          </button>
+        </div>`;
+
+      document.getElementById('copy-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('copy-btn');
+        const val = document.getElementById('code-val').innerText;
+        try {
+          await navigator.clipboard.writeText(val);
+          btn.classList.add('copied');
+          btn.innerHTML = `✓ &nbsp;Copied!`;
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Code`;
+          }, 2000);
+        } catch (e) {}
+      });
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      const raw = numInput.value.replace(/[^0-9]/g, '');
+      codeArea.innerHTML = '';
+
+      if (!raw) {
+        numInput.classList.add('error');
+        setStatus('Phone number is required', 'error');
+        return;
+      }
+
+      if (raw.length < 10) {
+        numInput.classList.add('error');
+        setStatus('Invalid number — include country code', 'error');
+        return;
+      }
+
+      numInput.classList.remove('error');
+      submitBtn.disabled = true;
+      setStatus('Requesting pair code…', 'loading');
+
+      try {
+        const { data } = await axios(`/code?number=${raw}`);
+        const code = data.code || 'Service Unavailable';
+        setStatus('');
+        showCode(code);
+      } catch (err) {
+        setStatus('Failed to get pair code. Try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    numInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitBtn.click();
+    });
+
+    numInput.addEventListener('input', () => numInput.classList.remove('error'));
+
+    // ── CANVAS ──
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, nodes = [], animId;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function initNodes() {
+      nodes = [];
+      const count = Math.min(Math.floor((W * H) / 16000), 55);
+      for (let i = 0; i < count; i++) {
+        nodes.push({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28,
+          r: Math.random() * 1.8 + 0.5, opacity: Math.random() * 0.45 + 0.1
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            gradient.addColorStop(0, `rgba(0,255,136,${(1 - dist / 150) * 0.1})`);
+            gradient.addColorStop(1, `rgba(0,204,255,${(1 - dist / 150) * 0.06})`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 0.6;
+            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(a.x - 1, a.y - 1, 0, a.x, a.y, a.r);
+        gradient.addColorStop(0, `rgba(0,255,136,${a.opacity})`);
+        gradient.addColorStop(1, `rgba(0,204,255,${a.opacity * 0.4})`);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+      animId = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { cancelAnimationFrame(animId); resize(); initNodes(); draw(); });
+    resize(); initNodes(); draw();
+  </script>
+</body>
+</html>

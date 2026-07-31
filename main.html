@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BENZO-MD • WhatsApp Session</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --neon: #00ff88;
+      --neon2: #00ccff;
+      --neon3: #ff00ff;
+      --text: #e8eaf0;
+      --muted: rgba(232,234,240,0.35);
+      --glow: 0 0 30px rgba(0,255,136,0.1);
+    }
+
+    html { width: 100%; min-height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(150px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%);
+      top: -300px; left: -300px;
+      animation: drift1 20s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,204,255,0.07), transparent 70%);
+      bottom: -200px; right: -200px;
+      animation: drift2 25s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,0,255,0.06), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: drift3 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 { to { transform: translate(120px, 100px); } }
+    @keyframes drift2 { to { transform: translate(-100px, -120px); } }
+    @keyframes drift3 { to { transform: translate(-50%, -50%) scale(1.5); } }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(48px, 8vh, 80px) clamp(16px, 4vw, 32px) clamp(48px, 8vh, 80px);
+      width: 100%;
+      max-width: 760px;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--neon);
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.15);
+      padding: 8px 24px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.1s;
+      backdrop-filter: blur(10px);
+    }
+
+    /* ── BOT IMAGE ── */
+    .bot-image {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,255,136,0.2);
+      padding: 6px;
+      background: rgba(0,255,136,0.05);
+      box-shadow: 0 0 60px rgba(0,255,136,0.08);
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.15s;
+      transition: transform 0.4s, box-shadow 0.4s;
+      object-fit: cover;
+    }
+
+    .bot-image:hover {
+      transform: scale(1.05) rotate(-5deg);
+      box-shadow: 0 0 80px rgba(0,255,136,0.2);
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.2s;
+    }
+
+    .brand-name {
+      font-size: clamp(3.8rem, 11vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #00ff88 0%, #00ccff 40%, #ff00ff 70%, #00ff88 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(9px, 1.8vw, 12px);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .brand-sub span {
+      color: var(--neon);
+      font-weight: 400;
+    }
+
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+      margin: 28px auto;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.3s;
+      border-radius: 4px;
+    }
+
+    /* ── TYPING SVG ── */
+    .typing-container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 32px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.35s;
+    }
+
+    .typing-container svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── GRID ── */
+    .grid-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.4s;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px 24px 28px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent 60%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20%; right: 20%;
+      height: 2px;
+      background: var(--card-glow, var(--neon));
+      opacity: 0;
+      transform: scaleX(0);
+      transition: all 0.4s;
+      border-radius: 4px;
+    }
+
+    .card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px var(--card-shadow, rgba(0,255,136,0.06));
+    }
+
+    .card:hover::after { opacity: 1; transform: scaleX(1); left: 10%; right: 10%; }
+    .card:active { transform: translateY(-3px) scale(0.97); }
+
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      background: var(--card-icon-bg, rgba(0,255,136,0.08));
+      border: 1px solid var(--card-icon-border, rgba(0,255,136,0.15));
+      transition: all 0.4s;
+      flex-shrink: 0;
+    }
+
+    .card:hover .card-icon {
+      transform: scale(1.1) rotate(-8deg);
+      box-shadow: 0 0 30px var(--card-shadow);
+    }
+
+    .card-label {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+      line-height: 1.7;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 22px; right: 22px;
+      font-size: 20px;
+      color: var(--muted);
+      transition: all 0.4s;
+    }
+
+    .card:hover .card-arrow {
+      transform: translate(4px, -4px);
+      color: var(--neon);
+    }
+
+    .card-qr   { --card-glow: var(--neon);  --card-shadow: rgba(0,255,136,0.1);   --card-icon-bg: rgba(0,255,136,0.08);   --card-icon-border: rgba(0,255,136,0.2); }
+    .card-pair { --card-glow: var(--neon2); --card-shadow: rgba(0,204,255,0.1);   --card-icon-bg: rgba(0,204,255,0.08);   --card-icon-border: rgba(0,204,255,0.2); }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 48px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      color: rgba(232,234,240,0.15);
+      letter-spacing: 2px;
+      text-align: center;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.6s;
+      line-height: 2;
+    }
+
+    .footer a {
+      color: rgba(0,255,136,0.4);
+      text-decoration: none;
+      transition: color 0.3s;
+      font-weight: 400;
+    }
+    .footer a:hover { color: var(--neon); }
+
+    .footer .heart {
+      color: rgba(255,0,100,0.3);
+      transition: color 0.3s;
+    }
+    .footer .heart:hover { color: #ff0066; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 540px) {
+      .grid-main { grid-template-columns: 1fr; gap: 12px; }
+
+      .card {
+        flex-direction: row;
+        align-items: center;
+        padding: 16px 56px 16px 18px;
+        gap: 16px;
+        border-radius: 18px;
+        min-height: 72px;
+      }
+
+      .card-icon { width: 44px !important; height: 44px !important; font-size: 20px !important; border-radius: 13px !important; }
+      .card-label { font-size: 15px; }
+      .card-desc { font-size: 10px; }
+      .card-arrow { top: 50%; right: 18px; transform: translateY(-50%); }
+      .card:hover .card-arrow { transform: translateY(-50%) translateX(4px); }
+
+      .bot-image { width: 100px; height: 100px; }
+    }
+
+    @media (max-width: 380px) {
+      .card { padding: 14px 48px 14px 14px; }
+      .card-icon { width: 38px !important; height: 38px !important; font-size: 16px !important; }
+      .badge { font-size: 8px; padding: 6px 16px; letter-spacing: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="wrapper">
+    <div class="badge">✦ BENZO-MD SESSION ✦</div>
+
+    <img class="bot-image" src="https://i.ibb.co/R4GM8Yqq/benzomd.jpg" alt="BENZO-MD">
+
+    <div class="brand">
+      <div class="brand-name">BENZO MD</div>
+      <div class="brand-sub">Multi-Device <span>✦</span> WhatsApp Bot</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- TYPING SVG -->
+    <div class="typing-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 40" width="100%" height="auto">
+        <text x="50%" y="28" font-family="'JetBrains Mono', monospace" font-size="16" fill="#00ff88" text-anchor="middle" font-weight="300" letter-spacing="2">
+          <tspan>
+            U WANT MY CODE? AM SORRY HAHAHA 😂
+          </tspan>
+        </text>
+      </svg>
+    </div>
+
+    <div class="grid-main">
+      <a class="card card-qr" onclick="window.open('/qrpage')" href="javascript:void(0)">
+        <div class="card-icon">⬛</div>
+        <div>
+          <div class="card-label">QR Code</div>
+          <div class="card-desc">Scan to link<br>your device</div>
+        </div>
+        <span class="card-arrow">↗</span>
+      </a>
+
+      <a class="card card-pair" onclick="window.open('/pair')" href="javascript:void(0)">
+        <div class="card-icon">🔑</div>
+        <div>
+          <div class="card-label">Pair Code</div>
+          <div class="card-desc">Link via<br>phone number</div>
+        </div>
+        <span class="card-arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      ⚡ Powered by <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a>
+      <br>
+      <span class="heart">❤</span> Made with Chaos by <a href="https://github.com/AmonTech1" target="_blank">Amon</a> <span class="heart">❤</span>
+      <br>
+      🇰🇪 Kenya ✦ Empty Folder Gang 💀
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, nodes = [], animId;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function initNodes() {
+      nodes = [];
+      const count = Math.min(Math.floor((W * H) / 15000), 70);
+      for (let i = 0; i < count; i++) {
+        nodes.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          r: Math.random() * 1.8 + 0.5,
+          opacity: Math.random() * 0.5 + 0.1
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            gradient.addColorStop(0, `rgba(0,255,136,${(1 - dist / 150) * 0.12})`);
+            gradient.addColorStop(1, `rgba(0,204,255,${(1 - dist / 150) * 0.08})`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 0.6;
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(a.x - 1, a.y - 1, 0, a.x, a.y, a.r);
+        gradient.addColorStop(0, `rgba(0,255,136,${a.opacity})`);
+        gradient.addColorStop(1, `rgba(0,204,255,${a.opacity * 0.5})`);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+      animId = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(animId);
+      resize(); initNodes(); draw();
+    });
+
+    resize(); initNodes(); draw();
+  </script>
+</body>
+</html>

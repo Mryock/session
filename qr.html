@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BENZO-MD • QR Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --neon: #00ff88;
+      --neon2: #00ccff;
+      --neon3: #ff00ff;
+      --text: #e8eaf0;
+      --muted: rgba(232,234,240,0.35);
+      --glow: 0 0 30px rgba(0,255,136,0.1);
+    }
+
+    html { width: 100%; min-height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(150px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%);
+      top: -300px; left: -300px;
+      animation: drift1 20s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,204,255,0.07), transparent 70%);
+      bottom: -200px; right: -200px;
+      animation: drift2 25s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,0,255,0.06), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: drift3 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 { to { transform: translate(120px, 100px); } }
+    @keyframes drift2 { to { transform: translate(-100px, -120px); } }
+    @keyframes drift3 { to { transform: translate(-50%, -50%) scale(1.5); } }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(48px, 8vh, 80px) clamp(16px, 4vw, 32px) clamp(48px, 8vh, 80px);
+      width: 100%;
+      max-width: 540px;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--neon);
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.15);
+      padding: 8px 24px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.1s;
+      backdrop-filter: blur(10px);
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.2s;
+    }
+
+    .brand-name {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #00ff88 0%, #00ccff 40%, #ff00ff 70%, #00ff88 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(9px, 1.8vw, 11px);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .brand-sub span {
+      color: var(--neon);
+      font-weight: 400;
+    }
+
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+      margin: 24px auto 32px;
+      border-radius: 4px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.25s;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.35s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      transition: border-color 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent 60%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    /* ── LOADING STATE ── */
+    .loading-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 44px 0;
+    }
+
+    .spinner-ring {
+      width: 56px; height: 56px;
+      border: 2.5px solid rgba(0,255,136,0.08);
+      border-top-color: var(--neon);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      box-shadow: 0 0 40px rgba(0,255,136,0.05);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .loading-text span {
+      color: var(--neon);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* ── QR DISPLAY ── */
+    .qr-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .qr-frame {
+      position: relative;
+      padding: 18px;
+      background: #ffffff;
+      border-radius: 22px;
+      box-shadow: 0 0 80px rgba(0,255,136,0.08), 0 0 160px rgba(0,204,255,0.04);
+      transition: box-shadow 0.4s;
+    }
+
+    .qr-frame:hover {
+      box-shadow: 0 0 100px rgba(0,255,136,0.12), 0 0 200px rgba(0,204,255,0.06);
+    }
+
+    .qr-frame::before,
+    .qr-frame::after {
+      content: '';
+      position: absolute;
+      width: 28px; height: 28px;
+      border-color: var(--neon);
+      border-style: solid;
+    }
+
+    .qr-frame::before {
+      top: -1px; left: -1px;
+      border-width: 3px 0 0 3px;
+      border-radius: 6px 0 0 0;
+    }
+
+    .qr-frame::after {
+      bottom: -1px; right: -1px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 6px 0;
+    }
+
+    .qr-frame-inner {
+      position: relative;
+    }
+
+    .qr-frame-inner::before,
+    .qr-frame-inner::after {
+      content: '';
+      position: absolute;
+      width: 28px; height: 28px;
+      border-color: var(--neon);
+      border-style: solid;
+    }
+
+    .qr-frame-inner::before {
+      top: -19px; right: -19px;
+      border-width: 3px 3px 0 0;
+      border-radius: 0 6px 0 0;
+    }
+
+    .qr-frame-inner::after {
+      bottom: -19px; left: -19px;
+      border-width: 0 0 3px 3px;
+      border-radius: 0 0 0 6px;
+    }
+
+    #qrImage {
+      display: block;
+      width: clamp(200px, 60vw, 260px);
+      height: clamp(200px, 60vw, 260px);
+      border-radius: 10px;
+      transition: transform 0.4s;
+    }
+
+    #qrImage:hover {
+      transform: scale(1.02);
+    }
+
+    .status-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--neon);
+      letter-spacing: 2px;
+      text-align: center;
+      background: rgba(0,255,136,0.04);
+      padding: 8px 20px;
+      border-radius: 100px;
+      border: 1px solid rgba(0,255,136,0.06);
+    }
+
+    /* ── STEPS ── */
+    .steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .step:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .step-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--neon);
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+      line-height: 1.6;
+    }
+
+    /* ── ERROR STATE ── */
+    .error-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 36px 0;
+    }
+
+    .error-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(255,80,80,0.06);
+      border: 1px solid rgba(255,80,80,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      color: rgba(255,100,100,0.7);
+    }
+
+    .error-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: rgba(255,100,100,0.6);
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .retry-btn {
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .retry-btn:hover {
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      margin-top: 36px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 300;
+      color: rgba(232,234,240,0.15);
+      letter-spacing: 3px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.6s;
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid transparent;
+    }
+
+    .back-link:hover {
+      color: var(--neon);
+      border-color: rgba(0,255,136,0.1);
+      background: rgba(0,255,136,0.03);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      color: rgba(232,234,240,0.08);
+      letter-spacing: 2px;
+      text-align: center;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.7s;
+    }
+
+    .footer a {
+      color: rgba(0,255,136,0.2);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer a:hover { color: var(--neon); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 28px 18px; }
+      .qr-frame { padding: 12px; }
+      .qr-frame::before, .qr-frame::after { width: 20px; height: 20px; }
+      .qr-frame-inner::before, .qr-frame-inner::after { width: 20px; height: 20px; }
+      .step { padding: 12px 14px; }
+      .loading-area { padding: 30px 0; }
+    }
+
+    @media (max-width: 360px) {
+      .badge { font-size: 8px; padding: 6px 16px; letter-spacing: 2px; }
+      .card { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="wrapper">
+    <div class="badge">✦ BENZO-MD QR ✦</div>
+
+    <div class="brand">
+      <div class="brand-name">BENZO  MD</div>
+      <div class="brand-sub">Multi-Device <span>✦</span> WhatsApp Bot</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+
+      <div class="loading-area" id="loading">
+        <div class="spinner-ring"></div>
+        <div class="loading-text">Generating <span>QR</span> code…</div>
+      </div>
+
+      <div class="qr-area" id="qr-area">
+        <div class="qr-frame">
+          <div class="qr-frame-inner">
+            <img id="qrImage" src="" alt="WhatsApp QR Code">
+          </div>
+        </div>
+        <div class="status-text" id="status"></div>
+        <div class="steps" id="steps"></div>
+      </div>
+
+      <div class="error-area" id="error-area">
+        <div class="error-icon">✕</div>
+        <div class="error-text" id="error-msg">Failed to load QR code</div>
+        <button class="retry-btn" onclick="loadQRCode()">Retry</button>
+      </div>
+
+    </div>
+
+    <a class="back-link" href="/">← back to home</a>
+
+    <div class="footer">
+      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a> • Made with Chaos by Amon 💀
+    </div>
+  </div>
+
+  <script>
+    async function loadQRCode() {
+      const loading  = document.getElementById('loading');
+      const qrArea   = document.getElementById('qr-area');
+      const errorArea = document.getElementById('error-area');
+
+      loading.style.display  = 'flex';
+      qrArea.style.display   = 'none';
+      errorArea.style.display = 'none';
+
+      try {
+        const res  = await fetch('/qr');
+        const data = await res.json();
+
+        if (data.qr) {
+          document.getElementById('qrImage').src = data.qr;
+          document.getElementById('status').textContent = data.message || 'Scan with WhatsApp';
+
+          const stepsEl = document.getElementById('steps');
+          stepsEl.innerHTML = '';
+          (data.instructions || []).forEach((step, i) => {
+            const text = step.replace(/^\d+\.\s*/, '');
+            stepsEl.innerHTML += `
+              <div class="step">
+                <div class="step-num">${i + 1}</div>
+                <div class="step-text">${text}</div>
+              </div>`;
+          });
+
+          loading.style.display = 'none';
+          qrArea.style.display  = 'flex';
+        } else {
+          throw new Error(data.code || 'No QR data');
+        }
+      } catch (err) {
+        document.getElementById('error-msg').textContent = err.message || 'Error fetching QR code';
+        loading.style.display   = 'none';
+        errorArea.style.display = 'flex';
+      }
+    }
+
+    loadQRCode();
+
+    // ── CANVAS ──
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, nodes = [], animId;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function initNodes() {
+      nodes = [];
+      const count = Math.min(Math.floor((W * H) / 16000), 55);
+      for (let i = 0; i < count; i++) {
+        nodes.push({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28,
+          r: Math.random() * 1.8 + 0.5, opacity: Math.random() * 0.45 + 0.1
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            gradient.addColorStop(0, `rgba(0,255,136,${(1 - dist / 150) * 0.1})`);
+            gradient.addColorStop(1, `rgba(0,204,255,${(1 - dist / 150) * 0.06})`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 0.6;
+            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(a.x - 1, a.y - 1, 0, a.x, a.y, a.r);
+        gradient.addColorStop(0, `rgba(0,255,136,${a.opacity})`);
+        gradient.addColorStop(1, `rgba(0,204,255,${a.opacity * 0.4})`);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+      animId = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { cancelAnimationFrame(animId); resize(); initNodes(); draw(); });
+    resize(); initNodes(); draw();
+  </script>
+</body>
+</html>
