@@ -14,45 +14,7 @@ const MAX_RECONNECT_ATTEMPTS = 3;
 const SESSION_TIMEOUT = 5 * 60 * 1000;
 const CLEANUP_DELAY = 5000;
 
-// ── BENZO-MD JOKES ──
-const JOKES = [
-    "U want my code? Am sorry hahaha 😂",
-    "Why did the developer go broke? Because he lost his cache! 💀",
-    "What do you call a bot that doesn't work? A 'whatsapp-not' bot! 😂",
-    "Why do programmers prefer dark mode? Because light attracts bugs! 🐛",
-    "My code works... I have no idea why! 🤡",
-    "Why did the QR code break up with the scanner? It found someone more attractive! 💔",
-    "How many developers does it take to fix a bug? None... it's a feature! ✨",
-    "Why do bots hate Mondays? Too many unread messages! 📱",
-    "My code is like my life... full of errors! 💀",
-    "Why did the session expire? It needed a break from all the requests! 😂",
-    "What's a bot's favorite game? Hide and seek... because nobody finds the bugs! 🎮",
-    "Why don't bots tell secrets? They always leak! 🔓",
-];
-
-function getRandomJoke() {
-    return JOKES[Math.floor(Math.random() * JOKES.length)];
-}
-
-// ── BENZO-MD INFO ──
-const CHANNEL_LINK = "https://whatsapp.com/channel/0029VbBaJvI7IUYbtCeaPh0I";
-const FORK_LINK = "https://github.com/AmonTech1/BENZO-MD/fork";
-const REPO_LINK = "https://github.com/AmonTech1/BENZO-MD";
-
-// ── MESSAGES ──
-const getRandomMessage = () => {
-    const messages = [
-        `🔥 BENZO-MD is alive! ${getRandomJoke()}`,
-        `⚡ Powered by Amon! ${getRandomJoke()}`,
-        `💀 Empty Folder Gang! ${getRandomJoke()}`,
-        `🤡 You expected a serious message? ${getRandomJoke()}`,
-        `✨ BENZO-MD - Made with chaos in Kenya! ${getRandomJoke()}`,
-        `🎩 By order of the Empty Folder Gang! ${getRandomJoke()}`,
-        `🔥 Fork me on GitHub: ${FORK_LINK}`,
-        `📢 Join my channel: ${CHANNEL_LINK}`,
-    ];
-    return messages[Math.floor(Math.random() * messages.length)];
-};
+const MESSAGE = ` *WELCOME TO BENZO-MD...* `; // your message
 
 async function removeFile(FilePath) {
     try {
@@ -71,21 +33,11 @@ function randomMegaId(len = 6, numLen = 4) {
 
 router.get('/', async (req, res) => {
     let num = req.query.number;
-    if (!num) return res.status(400).send({ 
-        code: 'Phone number is required',
-        joke: getRandomJoke(),
-        channel: CHANNEL_LINK,
-        fork: FORK_LINK
-    });
+    if (!num) return res.status(400).send({ code: 'Phone number is required' });
 
     num = num.replace(/[^0-9]/g, '');
     const phone = pn('+' + num);
-    if (!phone.isValid()) return res.status(400).send({ 
-        code: 'Invalid phone number.',
-        joke: getRandomJoke(),
-        channel: CHANNEL_LINK,
-        fork: FORK_LINK
-    });
+    if (!phone.isValid()) return res.status(400).send({ code: 'Invalid phone number.' });
     num = phone.getNumber('e164').replace('+', '');
 
     const sessionId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
@@ -93,8 +45,6 @@ router.get('/', async (req, res) => {
 
     let pairingCodeSent = false, sessionCompleted = false, isCleaningUp = false;
     let responseSent = false, reconnectAttempts = 0, currentSocket = null, timeoutHandle = null;
-
-    console.log(`😂 BENZO-MD Joke for ${num}: ${getRandomJoke()}`);
 
     async function cleanup(reason = 'unknown') {
         if (isCleaningUp) return;
@@ -111,18 +61,8 @@ router.get('/', async (req, res) => {
     async function initiateSession() {
         if (sessionCompleted || isCleaningUp) return;
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            if (!responseSent && !res.headersSent) { 
-                responseSent = true; 
-                res.status(503).send({ 
-                    code: 'Connection failed after multiple attempts',
-                    joke: getRandomJoke(),
-                    channel: CHANNEL_LINK,
-                    fork: FORK_LINK,
-                    repo: REPO_LINK
-                }); 
-            }
-            await cleanup('max_reconnects'); 
-            return;
+            if (!responseSent && !res.headersSent) { responseSent = true; res.status(503).send({ code: 'Connection failed after multiple attempts' }); }
+            await cleanup('max_reconnects'); return;
         }
         try {
             if (!fs.existsSync(dirs)) await fs.mkdir(dirs, { recursive: true });
@@ -159,16 +99,10 @@ router.get('/', async (req, res) => {
                             const megaSessionId = megaLink.replace('https://mega.nz/file/', '');
                             const userJid = jidNormalizedUser(num + '@s.whatsapp.net');
                             
-                            // ── BENZO-MD SESSION PREFIX ──
+                            // Add "benzo~" prefix to the mega session ID
                             const prefixedSessionId = `benzo~${megaSessionId}`;
-                            
-                            const msg = await sock.sendMessage(userJid, { 
-                                text: `🔥 *BENZO-MD SESSION*\n\n✦ *Session ID:* ${prefixedSessionId}\n\n${getRandomJoke()}\n\n📢 *Channel:* ${CHANNEL_LINK}\n🍴 *Fork:* ${FORK_LINK}\n⭐ *Repo:* ${REPO_LINK}` 
-                            });
-                            await sock.sendMessage(userJid, { 
-                                text: `💀 ${getRandomJoke()}`,
-                                quoted: msg 
-                            });
+                            const msg = await sock.sendMessage(userJid, { text: prefixedSessionId });
+                            await sock.sendMessage(userJid, { text: MESSAGE, quoted: msg });
                             await delay(1000);
                         }
                     } catch (err) { console.error('Error sending session:', err); }
@@ -181,15 +115,7 @@ router.get('/', async (req, res) => {
                     if (sessionCompleted || isCleaningUp) { await cleanup('already_complete'); return; }
                     const statusCode = lastDisconnect?.error?.output?.statusCode;
                     if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
-                        if (!responseSent && !res.headersSent) { 
-                            responseSent = true; 
-                            res.status(401).send({ 
-                                code: 'Invalid pairing code or session expired',
-                                joke: getRandomJoke(),
-                                channel: CHANNEL_LINK,
-                                fork: FORK_LINK
-                            }); 
-                        }
+                        if (!responseSent && !res.headersSent) { responseSent = true; res.status(401).send({ code: 'Invalid pairing code or session expired' }); }
                         await cleanup('logged_out');
                     } else if (pairingCodeSent && !sessionCompleted) {
                         reconnectAttempts++;
@@ -204,28 +130,10 @@ router.get('/', async (req, res) => {
                     pairingCodeSent = true;
                     let code = await sock.requestPairingCode(num);
                     code = code?.match(/.{1,4}/g)?.join('-') || code;
-                    if (!responseSent && !res.headersSent) { 
-                        responseSent = true; 
-                        res.send({ 
-                            code,
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK,
-                            fork: FORK_LINK,
-                            repo: REPO_LINK,
-                            message: `🔥 BENZO-MD Pairing Code Sent!`
-                        }); 
-                    }
+                    if (!responseSent && !res.headersSent) { responseSent = true; res.send({ code }); }
                 } catch (error) {
                     pairingCodeSent = false;
-                    if (!responseSent && !res.headersSent) { 
-                        responseSent = true; 
-                        res.status(503).send({ 
-                            code: 'Failed to get pairing code',
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK,
-                            fork: FORK_LINK
-                        }); 
-                    }
+                    if (!responseSent && !res.headersSent) { responseSent = true; res.status(503).send({ code: 'Failed to get pairing code' }); }
                     await cleanup('pairing_code_error');
                 }
             }
@@ -234,31 +142,14 @@ router.get('/', async (req, res) => {
 
             timeoutHandle = setTimeout(async () => {
                 if (!sessionCompleted && !isCleaningUp) {
-                    if (!responseSent && !res.headersSent) { 
-                        responseSent = true; 
-                        res.status(408).send({ 
-                            code: 'Pairing timeout',
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK,
-                            fork: FORK_LINK
-                        }); 
-                    }
+                    if (!responseSent && !res.headersSent) { responseSent = true; res.status(408).send({ code: 'Pairing timeout' }); }
                     await cleanup('timeout');
                 }
             }, SESSION_TIMEOUT);
 
         } catch (err) {
             console.error(`❌ Error initializing session for ${num}:`, err);
-            if (!responseSent && !res.headersSent) { 
-                responseSent = true; 
-                res.status(503).send({ 
-                    code: 'Service Unavailable',
-                    joke: getRandomJoke(),
-                    channel: CHANNEL_LINK,
-                    fork: FORK_LINK,
-                    repo: REPO_LINK
-                }); 
-            }
+            if (!responseSent && !res.headersSent) { responseSent = true; res.status(503).send({ code: 'Service Unavailable' }); }
             await cleanup('init_error');
         }
     }
