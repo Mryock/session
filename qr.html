@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BENZO-MD • QR Code</title>
+  <title>REAPER-XMD × BENZO-MD • QR Code</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -13,12 +13,13 @@
       --bg: #0a0a0f;
       --surface: rgba(255,255,255,0.03);
       --border: rgba(255,255,255,0.06);
-      --neon: #00ff88;
-      --neon2: #00ccff;
+      --neon1: #ff0040;
+      --neon2: #ff6b00;
       --neon3: #ff00ff;
+      --neon4: #00ff88;
       --text: #e8eaf0;
       --muted: rgba(232,234,240,0.35);
-      --glow: 0 0 30px rgba(0,255,136,0.1);
+      --glow: 0 0 30px rgba(255,0,64,0.1);
     }
 
     html { width: 100%; min-height: 100%; }
@@ -64,19 +65,19 @@
     }
     .orb-1 {
       width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%);
+      background: radial-gradient(circle, rgba(255,0,64,0.08), transparent 70%);
       top: -300px; left: -300px;
       animation: drift1 20s ease-in-out infinite alternate;
     }
     .orb-2 {
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(0,204,255,0.07), transparent 70%);
+      background: radial-gradient(circle, rgba(255,107,0,0.07), transparent 70%);
       bottom: -200px; right: -200px;
       animation: drift2 25s ease-in-out infinite alternate;
     }
     .orb-3 {
       width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(255,0,255,0.06), transparent 70%);
+      background: radial-gradient(circle, rgba(0,255,136,0.06), transparent 70%);
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       animation: drift3 18s ease-in-out infinite alternate;
@@ -105,15 +106,20 @@
       font-weight: 300;
       letter-spacing: 4px;
       text-transform: uppercase;
-      color: var(--neon);
-      background: rgba(0,255,136,0.06);
-      border: 1px solid rgba(0,255,136,0.15);
+      color: var(--neon1);
+      background: rgba(255,0,64,0.06);
+      border: 1px solid rgba(255,0,64,0.15);
       padding: 8px 24px;
       border-radius: 100px;
       margin-bottom: 28px;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.1s;
       backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .badge span {
+      color: var(--neon4);
     }
 
     /* ── BRAND ── */
@@ -125,16 +131,39 @@
     }
 
     .brand-name {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-size: clamp(2.2rem, 7vw, 4rem);
       font-weight: 900;
       line-height: 1;
       letter-spacing: -2px;
-      background: linear-gradient(135deg, #00ff88 0%, #00ccff 40%, #ff00ff 70%, #00ff88 100%);
+      background: linear-gradient(135deg, #ff0040 0%, #ff6b00 30%, #ff00ff 60%, #00ff88 100%);
       background-size: 300% 300%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: shimmer 4s ease-in-out infinite;
+      animation: shimmer 5s ease-in-out infinite;
+    }
+
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(8px, 1.6vw, 10px);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .brand-sub .reaper {
+      color: var(--neon1);
+      font-weight: 400;
+    }
+    .brand-sub .benzo {
+      color: var(--neon4);
+      font-weight: 400;
+    }
+
+    .brand-sub .sep {
+      color: rgba(255,255,255,0.1);
     }
 
     @keyframes shimmer {
@@ -143,30 +172,60 @@
       100% { background-position: 0% 50%; }
     }
 
-    .brand-sub {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(9px, 1.8vw, 11px);
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      margin-top: 10px;
-    }
-
-    .brand-sub span {
-      color: var(--neon);
-      font-weight: 400;
-    }
-
     .divider {
       width: 80px;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+      background: linear-gradient(90deg, transparent, var(--neon1), var(--neon2), var(--neon4), transparent);
       margin: 24px auto 32px;
       border-radius: 4px;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.25s;
     }
+
+    /* ── DUAL BOT TAGS ── */
+    .dual-tags {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.3s;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px 6px 12px;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .tag-reaper {
+      background: rgba(255,0,64,0.08);
+      border: 1px solid rgba(255,0,64,0.15);
+      color: #ff4466;
+    }
+
+    .tag-benzo {
+      background: rgba(0,255,136,0.08);
+      border: 1px solid rgba(0,255,136,0.15);
+      color: var(--neon4);
+    }
+
+    .tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .tag-dot.reaper { background: #ff0040; }
+    .tag-dot.benzo { background: #00ff88; }
 
     /* ── CARD ── */
     .card {
@@ -211,11 +270,11 @@
 
     .spinner-ring {
       width: 56px; height: 56px;
-      border: 2.5px solid rgba(0,255,136,0.08);
-      border-top-color: var(--neon);
+      border: 2.5px solid rgba(255,0,64,0.08);
+      border-top-color: #ff0040;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      box-shadow: 0 0 40px rgba(0,255,136,0.05);
+      box-shadow: 0 0 40px rgba(255,0,64,0.05);
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -230,7 +289,7 @@
     }
 
     .loading-text span {
-      color: var(--neon);
+      color: #ff4466;
       animation: pulse 1.5s ease-in-out infinite;
     }
 
@@ -254,12 +313,12 @@
       padding: 18px;
       background: #ffffff;
       border-radius: 22px;
-      box-shadow: 0 0 80px rgba(0,255,136,0.08), 0 0 160px rgba(0,204,255,0.04);
+      box-shadow: 0 0 80px rgba(255,0,64,0.08), 0 0 160px rgba(255,107,0,0.04);
       transition: box-shadow 0.4s;
     }
 
     .qr-frame:hover {
-      box-shadow: 0 0 100px rgba(0,255,136,0.12), 0 0 200px rgba(0,204,255,0.06);
+      box-shadow: 0 0 100px rgba(255,0,64,0.12), 0 0 200px rgba(255,107,0,0.06);
     }
 
     .qr-frame::before,
@@ -267,7 +326,7 @@
       content: '';
       position: absolute;
       width: 28px; height: 28px;
-      border-color: var(--neon);
+      border-color: #ff0040;
       border-style: solid;
     }
 
@@ -292,7 +351,7 @@
       content: '';
       position: absolute;
       width: 28px; height: 28px;
-      border-color: var(--neon);
+      border-color: #00ff88;
       border-style: solid;
     }
 
@@ -324,13 +383,13 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 300;
-      color: var(--neon);
+      color: #ff4466;
       letter-spacing: 2px;
       text-align: center;
-      background: rgba(0,255,136,0.04);
+      background: rgba(255,0,64,0.04);
       padding: 8px 20px;
       border-radius: 100px;
-      border: 1px solid rgba(0,255,136,0.06);
+      border: 1px solid rgba(255,0,64,0.06);
     }
 
     /* ── STEPS ── */
@@ -361,13 +420,13 @@
     .step-num {
       width: 26px; height: 26px;
       border-radius: 50%;
-      background: rgba(0,255,136,0.06);
-      border: 1px solid rgba(0,255,136,0.15);
+      background: rgba(255,0,64,0.06);
+      border: 1px solid rgba(255,0,64,0.15);
       display: flex; align-items: center; justify-content: center;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 500;
-      color: var(--neon);
+      color: #ff4466;
       flex-shrink: 0;
     }
 
@@ -445,7 +504,7 @@
     }
 
     .back-link:hover {
-      color: var(--neon);
+      color: var(--neon4);
       border-color: rgba(0,255,136,0.1);
       background: rgba(0,255,136,0.03);
     }
@@ -461,14 +520,19 @@
       text-align: center;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.7s;
+      line-height: 2;
     }
 
     .footer a {
-      color: rgba(0,255,136,0.2);
+      color: rgba(255,0,64,0.2);
       text-decoration: none;
       transition: color 0.3s;
     }
-    .footer a:hover { color: var(--neon); }
+    .footer a:hover { color: #ff4466; }
+
+    .footer .sep {
+      color: rgba(255,255,255,0.05);
+    }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(28px) scale(0.97); }
@@ -482,11 +546,13 @@
       .qr-frame-inner::before, .qr-frame-inner::after { width: 20px; height: 20px; }
       .step { padding: 12px 14px; }
       .loading-area { padding: 30px 0; }
+      .dual-tags { gap: 10px; }
     }
 
     @media (max-width: 360px) {
       .badge { font-size: 8px; padding: 6px 16px; letter-spacing: 2px; }
       .card { padding: 20px 14px; }
+      .tag { font-size: 7px; padding: 4px 12px 4px 8px; }
     }
   </style>
 </head>
@@ -498,14 +564,31 @@
   <canvas id="bg-canvas"></canvas>
 
   <div class="wrapper">
-    <div class="badge">✦ BENZO-MD QR ✦</div>
+    <div class="badge">✦ <span>REAPER-XMD</span> × <span>BENZO-MD</span> QR ✦</div>
 
     <div class="brand">
-      <div class="brand-name">BENZO  MD</div>
-      <div class="brand-sub">Multi-Device <span>✦</span> WhatsApp Bot</div>
+      <div class="brand-name">⚡ REAPER × BENZO</div>
+      <div class="brand-sub">
+        <span class="reaper">REAPER-XMD</span> 
+        <span class="sep">✦</span> 
+        <span class="benzo">BENZO-MD</span>
+        <br>
+        Dual Bot · Shared Session
+      </div>
     </div>
 
     <div class="divider"></div>
+
+    <div class="dual-tags">
+      <div class="tag tag-reaper">
+        <span class="tag-dot reaper"></span>
+        REAPER-XMD
+      </div>
+      <div class="tag tag-benzo">
+        <span class="tag-dot benzo"></span>
+        BENZO-MD
+      </div>
+    </div>
 
     <div class="card">
 
@@ -535,7 +618,11 @@
     <a class="back-link" href="/">← back to home</a>
 
     <div class="footer">
-      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a> • Made with Chaos by Amon 💀
+      🔥 <a href="https://github.com/ReaperTechInc/REAPER-XMD" target="_blank">REAPER-XMD</a> 
+      <span class="sep">•</span> 
+      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a>
+      <br>
+      Made with Chaos by ReaperTech & Amon 💀
     </div>
   </div>
 
@@ -618,8 +705,9 @@
           if (dist < 150) {
             ctx.beginPath();
             const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-            gradient.addColorStop(0, `rgba(0,255,136,${(1 - dist / 150) * 0.1})`);
-            gradient.addColorStop(1, `rgba(0,204,255,${(1 - dist / 150) * 0.06})`);
+            gradient.addColorStop(0, `rgba(255,0,64,${(1 - dist / 150) * 0.1})`);
+            gradient.addColorStop(0.5, `rgba(255,107,0,${(1 - dist / 150) * 0.08})`);
+            gradient.addColorStop(1, `rgba(0,255,136,${(1 - dist / 150) * 0.06})`);
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 0.6;
             ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
@@ -629,8 +717,9 @@
         ctx.beginPath();
         ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(a.x - 1, a.y - 1, 0, a.x, a.y, a.r);
-        gradient.addColorStop(0, `rgba(0,255,136,${a.opacity})`);
-        gradient.addColorStop(1, `rgba(0,204,255,${a.opacity * 0.4})`);
+        gradient.addColorStop(0, `rgba(255,0,64,${a.opacity})`);
+        gradient.addColorStop(0.5, `rgba(255,107,0,${a.opacity * 0.6})`);
+        gradient.addColorStop(1, `rgba(0,255,136,${a.opacity * 0.4})`);
         ctx.fillStyle = gradient;
         ctx.fill();
       }
