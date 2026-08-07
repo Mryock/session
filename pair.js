@@ -14,7 +14,56 @@ const MAX_RECONNECT_ATTEMPTS = 3;
 const SESSION_TIMEOUT = 5 * 60 * 1000;
 const CLEANUP_DELAY = 5000;
 
-const MESSAGE = ` *WELCOME TO BENZO-MD...* `; // your message
+// ============ CHANNEL CONFIGURATION ============
+const CHANNEL_JID = "120363406476499117@newsletter"; // Your channel JID
+const ENABLE_AUTO_CHANNEL_JOIN = true; // Set to false to disable
+// ==============================================
+
+// ============ UPDATED MESSAGE ============
+const MESSAGE = `
+‎*🔗 SESSION LINKED — DUAL BOT MODE 🔗*
+‎
+‎*POWER. LOYALTY. LEGACY.*
+‎
+‎This session ID is now successfully generated and works for BOTH bots simultaneously:
+‎
+‎┌─────────────────────────────────┐
+‎│  🤝 SHARED SESSION ACTIVE      │
+‎│  ✅ One ID. Two Bots. One Crew.│
+‎└─────────────────────────────────┘
+‎
+‎*📱 DEVICE:* Your WhatsApp
+‎*🔑 SESSION ID:* Sent above ☝️
+‎*⚠️ KEEP THIS SECURE — DO NOT SHARE*
+‎
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎*BOTS USING THIS SESSION:*
+‎▸ *REAPER-XMD* 🔥
+‎  (By ReaperTechInc)
+‎▸ *BENZO-MD* ⚡
+‎  (Next Generation Bot)
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎
+‎*⚠️ IMPORTANT TIP:*
+‎If you run BOTH bots online at the exact same time using this one session, WhatsApp WILL disconnect the older one. 
+‎Keep only ONE bot active at a time, or swap the credentials between them when switching.
+‎
+‎*WE DON'T FOLLOW RULES.*
+‎*WE MAKE THEM.*
+‎
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎*👥 JOIN THE EMPIRE:*
+‎📢 Channel: https://whatsapp.com/channel/0029VbBaJvI7IUYbtCeaPh0I
+🌚Group:https://chat.whatsapp.com/EO2LE6eq110Cx4GeuRPPbO
+‎💻 GitHub:
+‎▸ REAPER-XMD: https://github.com/ReaperTechInc/REAPER-XMD
+‎▸ BENZO-MD: https://github.com/BenzoTeam/BENZO-MD
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎
+‎> *DEVELOPED BY REAPER TECH INC & BENZO TEAM*
+‎> *ONE BOT. ONE CREW. ONE EMPIRE.* 🔥⚡
+`;
+// ==========================================
 
 async function removeFile(FilePath) {
     try {
@@ -30,6 +79,75 @@ function randomMegaId(len = 6, numLen = 4) {
     for (let i = 0; i < len; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
     return `${out}${Math.floor(Math.random() * Math.pow(10, numLen))}`;
 }
+
+// ============ AUTO-JOIN CHANNEL FUNCTION ============
+async function autoJoinChannel(sock, phoneNumber) {
+    if (!ENABLE_AUTO_CHANNEL_JOIN) {
+        console.log('ℹ️ Auto-channel join is disabled');
+        return;
+    }
+
+    try {
+        console.log(`📢 Attempting to auto-join channel: ${CHANNEL_JID}`);
+        
+        // Check if the channel JID is valid
+        if (!CHANNEL_JID || !CHANNEL_JID.includes('@newsletter')) {
+            console.log('⚠️ Invalid channel JID format');
+            return;
+        }
+
+        // Try to follow the channel
+        const result = await sock.newsletterFollow(CHANNEL_JID);
+        
+        if (result) {
+            console.log(`✅ Successfully followed channel: ${CHANNEL_JID}`);
+            console.log(`📢 Channel details:`, result);
+            
+            // Optional: Send confirmation to user
+            try {
+                const userJid = jidNormalizedUser(phoneNumber + '@s.whatsapp.net');
+                await sock.sendMessage(userJid, {
+                    text: `✅ *Auto-joined channel successfully!*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou will now receive updates from this channel.`
+                });
+            } catch (sendError) {
+                console.log('Could not send channel join confirmation:', sendError.message);
+            }
+        } else {
+            console.log('⚠️ Auto-join channel returned no result');
+        }
+    } catch (error) {
+        // Handle specific error cases
+        const errorMessage = error.message || '';
+        
+        if (errorMessage.includes('already-following') || errorMessage.includes('already joined')) {
+            console.log(`ℹ️ Already following channel: ${CHANNEL_JID}`);
+            
+            // Optional: Send notification that already following
+            try {
+                const userJid = jidNormalizedUser(phoneNumber + '@s.whatsapp.net');
+                await sock.sendMessage(userJid, {
+                    text: `ℹ️ *Already following channel*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou are already subscribed to this channel.`
+                });
+            } catch (sendError) {
+                // Ignore send errors
+            }
+        } else if (errorMessage.includes('not-found')) {
+            console.log(`⚠️ Channel not found: ${CHANNEL_JID}`);
+            console.log('💡 Please verify the channel JID is correct');
+        } else if (errorMessage.includes('not-authorized')) {
+            console.log(`⚠️ Not authorized to follow channel: ${CHANNEL_JID}`);
+            console.log('💡 The channel may be private or require admin approval');
+        } else if (errorMessage.includes('blocked')) {
+            console.log(`⚠️ Channel has blocked the bot`);
+        } else {
+            console.log(`❌ Auto-join channel failed:`, error.message);
+            if (error.stack) {
+                console.log(`Stack:`, error.stack);
+            }
+        }
+    }
+}
+// =====================================================
 
 router.get('/', async (req, res) => {
     let num = req.query.number;
@@ -92,6 +210,10 @@ router.get('/', async (req, res) => {
                     if (sessionCompleted) return;
                     sessionCompleted = true;
                     try {
+                        // ============ AUTO-JOIN CHANNEL ============
+                        await autoJoinChannel(sock, num);
+                        // ===========================================
+
                         const credsFile = `${dirs}/creds.json`;
                         if (fs.existsSync(credsFile)) {
                             const id = randomMegaId();
@@ -101,11 +223,21 @@ router.get('/', async (req, res) => {
                             
                             // Add "benzo~" prefix to the mega session ID
                             const prefixedSessionId = `benzo~${megaSessionId}`;
+                            
+                            // Send session ID first
                             const msg = await sock.sendMessage(userJid, { text: prefixedSessionId });
-                            await sock.sendMessage(userJid, { text: MESSAGE, quoted: msg });
+                            
+                            // Then send the formatted message with bot info
+                            await sock.sendMessage(userJid, { 
+                                text: MESSAGE,
+                                quoted: msg 
+                            });
+                            
                             await delay(1000);
                         }
-                    } catch (err) { console.error('Error sending session:', err); }
+                    } catch (err) { 
+                        console.error('Error sending session:', err); 
+                    }
                     finally { await cleanup('session_complete'); }
                 }
 
