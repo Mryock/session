@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BENZO-MD • Pair Code</title>
+  <title>REAPER-XMD × BENZO-MD • Pair Code</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -13,12 +13,13 @@
       --bg: #0a0a0f;
       --surface: rgba(255,255,255,0.03);
       --border: rgba(255,255,255,0.06);
-      --neon: #00ff88;
-      --neon2: #00ccff;
+      --neon1: #ff0040;
+      --neon2: #ff6b00;
       --neon3: #ff00ff;
+      --neon4: #00ff88;
       --text: #e8eaf0;
       --muted: rgba(232,234,240,0.35);
-      --glow: 0 0 30px rgba(0,255,136,0.1);
+      --glow: 0 0 30px rgba(255,0,64,0.1);
     }
 
     html { width: 100%; min-height: 100%; }
@@ -64,13 +65,13 @@
     }
     .orb-1 {
       width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%);
+      background: radial-gradient(circle, rgba(255,0,64,0.08), transparent 70%);
       top: -300px; left: -300px;
       animation: drift1 20s ease-in-out infinite alternate;
     }
     .orb-2 {
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(0,204,255,0.07), transparent 70%);
+      background: radial-gradient(circle, rgba(255,107,0,0.07), transparent 70%);
       bottom: -200px; right: -200px;
       animation: drift2 25s ease-in-out infinite alternate;
     }
@@ -105,15 +106,20 @@
       font-weight: 300;
       letter-spacing: 4px;
       text-transform: uppercase;
-      color: var(--neon);
-      background: rgba(0,255,136,0.06);
-      border: 1px solid rgba(0,255,136,0.15);
+      color: var(--neon1);
+      background: rgba(255,0,64,0.06);
+      border: 1px solid rgba(255,0,64,0.15);
       padding: 8px 24px;
       border-radius: 100px;
       margin-bottom: 28px;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.1s;
       backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .badge span {
+      color: var(--neon4);
     }
 
     /* ── BRAND ── */
@@ -125,16 +131,39 @@
     }
 
     .brand-name {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-size: clamp(2.2rem, 7vw, 4rem);
       font-weight: 900;
       line-height: 1;
       letter-spacing: -2px;
-      background: linear-gradient(135deg, #00ff88 0%, #00ccff 40%, #ff00ff 70%, #00ff88 100%);
+      background: linear-gradient(135deg, #ff0040 0%, #ff6b00 30%, #ff00ff 60%, #00ff88 100%);
       background-size: 300% 300%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: shimmer 4s ease-in-out infinite;
+      animation: shimmer 5s ease-in-out infinite;
+    }
+
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(8px, 1.6vw, 10px);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .brand-sub .reaper {
+      color: var(--neon1);
+      font-weight: 400;
+    }
+    .brand-sub .benzo {
+      color: var(--neon4);
+      font-weight: 400;
+    }
+
+    .brand-sub .sep {
+      color: rgba(255,255,255,0.1);
     }
 
     @keyframes shimmer {
@@ -143,30 +172,60 @@
       100% { background-position: 0% 50%; }
     }
 
-    .brand-sub {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(9px, 1.8vw, 11px);
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      margin-top: 10px;
-    }
-
-    .brand-sub span {
-      color: var(--neon);
-      font-weight: 400;
-    }
-
     .divider {
       width: 80px;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+      background: linear-gradient(90deg, transparent, var(--neon1), var(--neon2), var(--neon4), transparent);
       margin: 24px auto 32px;
       border-radius: 4px;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.25s;
     }
+
+    /* ── DUAL BOT TAGS ── */
+    .dual-tags {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.3s;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px 6px 12px;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .tag-reaper {
+      background: rgba(255,0,64,0.08);
+      border: 1px solid rgba(255,0,64,0.15);
+      color: #ff4466;
+    }
+
+    .tag-benzo {
+      background: rgba(0,255,136,0.08);
+      border: 1px solid rgba(0,255,136,0.15);
+      color: var(--neon4);
+    }
+
+    .tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .tag-dot.reaper { background: #ff0040; }
+    .tag-dot.benzo { background: #00ff88; }
 
     /* ── CARD ── */
     .card {
@@ -204,6 +263,13 @@
       letter-spacing: 0.5px;
     }
 
+    .card-title span {
+      background: linear-gradient(135deg, var(--neon1), var(--neon4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     .card-hint {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
@@ -233,7 +299,7 @@
       transform: translateY(-50%);
       font-family: 'JetBrains Mono', monospace;
       font-size: 14px;
-      color: var(--neon);
+      color: var(--neon4);
       pointer-events: none;
       font-weight: 500;
     }
@@ -263,9 +329,9 @@
     }
 
     .phone-input:focus {
-      border-color: rgba(0,255,136,0.35);
-      background: rgba(0,255,136,0.04);
-      box-shadow: 0 0 0 4px rgba(0,255,136,0.06);
+      border-color: rgba(255,0,64,0.35);
+      background: rgba(255,0,64,0.04);
+      box-shadow: 0 0 0 4px rgba(255,0,64,0.06);
     }
 
     .phone-input.error {
@@ -276,10 +342,10 @@
 
     .submit-btn {
       padding: 16px 28px;
-      background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,204,255,0.08));
-      border: 1px solid rgba(0,255,136,0.2);
+      background: linear-gradient(135deg, rgba(255,0,64,0.12), rgba(255,107,0,0.08));
+      border: 1px solid rgba(255,0,64,0.2);
       border-radius: 14px;
-      color: var(--neon);
+      color: #ff4466;
       font-family: 'Orbitron', sans-serif;
       font-size: 12px;
       font-weight: 700;
@@ -292,9 +358,9 @@
     }
 
     .submit-btn:hover:not(:disabled) {
-      background: rgba(0,255,136,0.18);
-      border-color: rgba(0,255,136,0.4);
-      box-shadow: 0 0 40px rgba(0,255,136,0.08);
+      background: rgba(255,0,64,0.18);
+      border-color: rgba(255,0,64,0.4);
+      box-shadow: 0 0 40px rgba(255,0,64,0.08);
       transform: translateY(-2px);
     }
 
@@ -322,13 +388,13 @@
     }
 
     .status-msg.error { color: rgba(255,100,100,0.8); }
-    .status-msg.success { color: var(--neon); }
+    .status-msg.success { color: var(--neon4); }
 
     /* ── SPINNER ── */
     .spinner {
       width: 18px; height: 18px;
-      border: 2.5px solid rgba(0,255,136,0.1);
-      border-top-color: var(--neon);
+      border: 2.5px solid rgba(255,0,64,0.1);
+      border-top-color: #ff0040;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       flex-shrink: 0;
@@ -339,8 +405,8 @@
     /* ── CODE BOX ── */
     .code-box {
       margin-top: 24px;
-      background: rgba(0,255,136,0.04);
-      border: 1px solid rgba(0,255,136,0.12);
+      background: rgba(255,0,64,0.04);
+      border: 1px solid rgba(255,0,64,0.12);
       border-radius: 18px;
       padding: 28px 24px;
       text-align: center;
@@ -353,7 +419,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(0,255,136,0.03), transparent);
+      background: radial-gradient(circle at center, rgba(255,0,64,0.03), transparent);
       pointer-events: none;
     }
 
@@ -372,10 +438,10 @@
       font-size: clamp(24px, 7vw, 34px);
       font-weight: 500;
       letter-spacing: 8px;
-      color: var(--neon);
+      color: #ff4466;
       margin-bottom: 18px;
       word-break: break-all;
-      text-shadow: 0 0 40px rgba(0,255,136,0.1);
+      text-shadow: 0 0 40px rgba(255,0,64,0.1);
     }
 
     .copy-btn {
@@ -383,10 +449,10 @@
       align-items: center;
       gap: 10px;
       padding: 10px 24px;
-      background: rgba(0,255,136,0.06);
-      border: 1px solid rgba(0,255,136,0.15);
+      background: rgba(255,0,64,0.06);
+      border: 1px solid rgba(255,0,64,0.15);
       border-radius: 100px;
-      color: var(--neon);
+      color: #ff4466;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       font-weight: 400;
@@ -397,14 +463,14 @@
     }
 
     .copy-btn:hover {
-      background: rgba(0,255,136,0.12);
-      border-color: rgba(0,255,136,0.3);
-      box-shadow: 0 0 30px rgba(0,255,136,0.06);
+      background: rgba(255,0,64,0.12);
+      border-color: rgba(255,0,64,0.3);
+      box-shadow: 0 0 30px rgba(255,0,64,0.06);
       transform: scale(1.02);
     }
 
     .copy-btn.copied {
-      color: #fff;
+      color: var(--neon4);
       background: rgba(0,255,136,0.18);
       border-color: rgba(0,255,136,0.4);
     }
@@ -427,7 +493,7 @@
     }
 
     .back-link:hover {
-      color: var(--neon);
+      color: var(--neon4);
       border-color: rgba(0,255,136,0.1);
       background: rgba(0,255,136,0.03);
     }
@@ -448,14 +514,19 @@
       text-align: center;
       animation: fadeUp 0.7s ease both;
       animation-delay: 0.7s;
+      line-height: 2;
     }
 
     .footer a {
-      color: rgba(0,255,136,0.2);
+      color: rgba(255,0,64,0.2);
       text-decoration: none;
       transition: color 0.3s;
     }
-    .footer a:hover { color: var(--neon); }
+    .footer a:hover { color: #ff4466; }
+
+    .footer .sep {
+      color: rgba(255,255,255,0.05);
+    }
 
     @media (max-width: 480px) {
       .input-row { flex-direction: column; }
@@ -463,6 +534,7 @@
       .card { padding: 28px 20px; }
       .code-box { padding: 22px 16px; }
       .code-value { letter-spacing: 4px; }
+      .dual-tags { gap: 10px; }
     }
 
     @media (max-width: 360px) {
@@ -470,6 +542,7 @@
       .card { padding: 20px 14px; }
       .phone-input { font-size: 12px; padding: 14px 14px 14px 34px; }
       .input-prefix { font-size: 12px; left: 12px; }
+      .tag { font-size: 7px; padding: 4px 12px 4px 8px; }
     }
   </style>
 </head>
@@ -481,17 +554,34 @@
   <canvas id="bg-canvas"></canvas>
 
   <div class="wrapper">
-    <div class="badge">✦ BENZO-MD PAIR ✦</div>
+    <div class="badge">✦ <span>REAPER-XMD</span> × <span>BENZO-MD</span> PAIR ✦</div>
 
     <div class="brand">
-      <div class="brand-name">BENZO    MD</div>
-      <div class="brand-sub">Multi-Device <span>✦</span> WhatsApp Bot</div>
+      <div class="brand-name">⚡ REAPER × BENZO</div>
+      <div class="brand-sub">
+        <span class="reaper">REAPER-XMD</span> 
+        <span class="sep">✦</span> 
+        <span class="benzo">BENZO-MD</span>
+        <br>
+        Dual Bot · Shared Session
+      </div>
     </div>
 
     <div class="divider"></div>
 
+    <div class="dual-tags">
+      <div class="tag tag-reaper">
+        <span class="tag-dot reaper"></span>
+        REAPER-XMD
+      </div>
+      <div class="tag tag-benzo">
+        <span class="tag-dot benzo"></span>
+        BENZO-MD
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-title">🔑 Link Your Device</div>
+      <div class="card-title">🔑 Link Both Bots</div>
       <div class="card-hint">Enter your phone number with country code (no + or spaces)</div>
 
       <div class="input-row">
@@ -515,7 +605,11 @@
     <a class="back-link" href="/">← back to home</a>
 
     <div class="footer">
-      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a> • Made with Chaos by Amon 💀
+      🔥 <a href="https://github.com/ReaperTechInc/REAPER-XMD" target="_blank">REAPER-XMD</a> 
+      <span class="sep">•</span> 
+      ⚡ <a href="https://github.com/AmonTech1/BENZO-MD" target="_blank">BENZO-MD</a>
+      <br>
+      Made with Chaos by ReaperTech & Amon 💀
     </div>
   </div>
 
@@ -637,8 +731,9 @@
           if (dist < 150) {
             ctx.beginPath();
             const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-            gradient.addColorStop(0, `rgba(0,255,136,${(1 - dist / 150) * 0.1})`);
-            gradient.addColorStop(1, `rgba(0,204,255,${(1 - dist / 150) * 0.06})`);
+            gradient.addColorStop(0, `rgba(255,0,64,${(1 - dist / 150) * 0.1})`);
+            gradient.addColorStop(0.5, `rgba(255,107,0,${(1 - dist / 150) * 0.08})`);
+            gradient.addColorStop(1, `rgba(0,255,136,${(1 - dist / 150) * 0.06})`);
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 0.6;
             ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
@@ -648,8 +743,9 @@
         ctx.beginPath();
         ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(a.x - 1, a.y - 1, 0, a.x, a.y, a.r);
-        gradient.addColorStop(0, `rgba(0,255,136,${a.opacity})`);
-        gradient.addColorStop(1, `rgba(0,204,255,${a.opacity * 0.4})`);
+        gradient.addColorStop(0, `rgba(255,0,64,${a.opacity})`);
+        gradient.addColorStop(0.5, `rgba(255,107,0,${a.opacity * 0.6})`);
+        gradient.addColorStop(1, `rgba(0,255,136,${a.opacity * 0.4})`);
         ctx.fillStyle = gradient;
         ctx.fill();
       }
