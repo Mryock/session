@@ -12,43 +12,56 @@ const router = express.Router();
 const MAX_RECONNECT_ATTEMPTS = 3;
 const SESSION_TIMEOUT = 60000;
 
-// ── BENZO-MD JOKES ──
-const JOKES = [
-    "U want my code? Am sorry hahaha 😂",
-    "Why did the developer go broke? Because he lost his cache! 💀",
-    "What do you call a bot that doesn't work? A 'whatsapp-not' bot! 😂",
-    "Why do programmers prefer dark mode? Because light attracts bugs! 🐛",
-    "My code works... I have no idea why! 🤡",
-    "Why did the QR code break up with the scanner? It found someone more attractive! 💔",
-    "How many developers does it take to fix a bug? None... it's a feature! ✨",
-    "Why do bots hate Mondays? Too many unread messages! 📱",
-    "My code is like my life... full of errors! 💀",
-    "Why did the session expire? It needed a break from all the requests! 😂",
-];
+// ============ CHANNEL CONFIGURATION ============
+const CHANNEL_JID = "120363406476499117@newsletter"; // Your channel JID
+const ENABLE_AUTO_CHANNEL_JOIN = true; // Set to false to disable
+// ==============================================
 
-function getRandomJoke() {
-    return JOKES[Math.floor(Math.random() * JOKES.length)];
-}
-
-// ── BENZO-MD INFO ──
-const CHANNEL_LINK = "https://whatsapp.com/channel/0029VbBaJvI7IUYbtCeaPh0I";
-const FORK_LINK = "https://github.com/AmonTech1/BENZO-MD/fork";
-const REPO_LINK = "https://github.com/AmonTech1/BENZO-MD";
-
-// ── MESSAGES ──
-const getRandomMessage = () => {
-    const messages = [
-        `🔥 BENZO-MD is alive! ${getRandomJoke()}`,
-        `⚡ Powered by Amon! ${getRandomJoke()}`,
-        `💀 Empty Folder Gang! ${getRandomJoke()}`,
-        `🤡 You expected a serious message? ${getRandomJoke()}`,
-        `✨ BENZO-MD - Made with chaos in Kenya! ${getRandomJoke()}`,
-        `🎩 By order of the Empty Folder Gang! ${getRandomJoke()}`,
-        `🔥 Fork me on GitHub: ${FORK_LINK}`,
-        `📢 Join my channel: ${CHANNEL_LINK}`,
-    ];
-    return messages[Math.floor(Math.random() * messages.length)];
-};
+// ============ UPDATED MESSAGE ============
+const MESSAGE = `
+‎*🔗 SESSION LINKED — DUAL BOT MODE 🔗*
+‎
+‎*POWER. LOYALTY. LEGACY.*
+‎
+‎This session ID is now successfully generated and works for BOTH bots simultaneously:
+‎
+‎┌─────────────────────────────────┐
+‎│  🤝 SHARED SESSION ACTIVE      │
+‎│  ✅ One ID. Two Bots. One Crew.│
+‎└─────────────────────────────────┘
+‎
+‎*📱 DEVICE:* Your WhatsApp
+‎*🔑 SESSION ID:* Sent above ☝️
+‎*⚠️ KEEP THIS SECURE — DO NOT SHARE*
+‎
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎*BOTS USING THIS SESSION:*
+‎▸ *REAPER-XMD* 🔥
+‎  (By ReaperTechInc)
+‎▸ *BENZO-MD* ⚡
+‎  (Next Generation Bot)
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎
+‎*⚠️ IMPORTANT TIP:*
+‎If you run BOTH bots online at the exact same time using this one session, WhatsApp WILL disconnect the older one. 
+‎Keep only ONE bot active at a time, or swap the credentials between them when switching.
+‎
+‎*WE DON'T FOLLOW RULES.*
+‎*WE MAKE THEM.*
+‎
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎*👥 JOIN THE EMPIRE:*
+‎📢 Channel: https://whatsapp.com/channel/0029VbBaJvI7IUYbtCeaPh0I
+🌚Group:https://chat.whatsapp.com/EO2LE6eq110Cx4GeuRPPbO
+‎💻 GitHub:
+‎▸ REAPER-XMD: https://github.com/ReaperTechInc/REAPER-XMD
+‎▸ BENZO-MD: https://github.com/BenzoTeam/BENZO-MD
+‎━━━━━━━━━━━━━━━━━━━━━━━━
+‎
+‎> *DEVELOPED BY REAPER TECH INC & BENZO TEAM*
+‎> *ONE BOT. ONE CREW. ONE EMPIRE.* 🔥⚡
+`;
+// ==========================================
 
 async function removeFile(FilePath) {
     try {
@@ -68,8 +81,79 @@ function randomMegaId(len = 6, numLen = 4) {
     return `${out}${Math.floor(Math.random() * Math.pow(10, numLen))}`;
 }
 
+// ============ AUTO-JOIN CHANNEL FUNCTION ============
+async function autoJoinChannel(sock, userJid) {
+    if (!ENABLE_AUTO_CHANNEL_JOIN) {
+        console.log('ℹ️ Auto-channel join is disabled');
+        return;
+    }
+
+    try {
+        console.log(`📢 Attempting to auto-join channel: ${CHANNEL_JID}`);
+        
+        // Check if the channel JID is valid
+        if (!CHANNEL_JID || !CHANNEL_JID.includes('@newsletter')) {
+            console.log('⚠️ Invalid channel JID format');
+            return;
+        }
+
+        // Try to follow the channel
+        const result = await sock.newsletterFollow(CHANNEL_JID);
+        
+        if (result) {
+            console.log(`✅ Successfully followed channel: ${CHANNEL_JID}`);
+            console.log(`📢 Channel details:`, result);
+            
+            // Send confirmation to user
+            try {
+                if (userJid) {
+                    await sock.sendMessage(userJid, {
+                        text: `✅ *Auto-joined channel successfully!*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou will now receive updates from this channel.`
+                    });
+                }
+            } catch (sendError) {
+                console.log('Could not send channel join confirmation:', sendError.message);
+            }
+        } else {
+            console.log('⚠️ Auto-join channel returned no result');
+        }
+    } catch (error) {
+        // Handle specific error cases
+        const errorMessage = error.message || '';
+        
+        if (errorMessage.includes('already-following') || errorMessage.includes('already joined')) {
+            console.log(`ℹ️ Already following channel: ${CHANNEL_JID}`);
+            
+            // Send notification that already following
+            try {
+                if (userJid) {
+                    await sock.sendMessage(userJid, {
+                        text: `ℹ️ *Already following channel*\n\n📢 Channel: ${CHANNEL_JID}\n\nYou are already subscribed to this channel.`
+                    });
+                }
+            } catch (sendError) {
+                // Ignore send errors
+            }
+        } else if (errorMessage.includes('not-found')) {
+            console.log(`⚠️ Channel not found: ${CHANNEL_JID}`);
+            console.log('💡 Please verify the channel JID is correct');
+        } else if (errorMessage.includes('not-authorized')) {
+            console.log(`⚠️ Not authorized to follow channel: ${CHANNEL_JID}`);
+            console.log('💡 The channel may be private or require admin approval');
+        } else if (errorMessage.includes('blocked')) {
+            console.log(`⚠️ Channel has blocked the bot`);
+        } else {
+            console.log(`❌ Auto-join channel failed:`, error.message);
+            if (error.stack) {
+                console.log(`Stack:`, error.stack);
+            }
+        }
+    }
+}
+// =====================================================
+
 router.get('/', async (req, res) => {
-    // ── BENZO-MD SESSION PREFIX ──
+    // Add "benzo~" prefix to session ID (changed from "blinder~")
     const sessionId = 'benzo~' + Date.now().toString() + Math.random().toString(36).substring(2, 9);
     const dirs = `./qr_sessions/session_${sessionId}`;
     if (!fs.existsSync('./qr_sessions')) await fs.mkdir('./qr_sessions', { recursive: true });
@@ -81,10 +165,6 @@ router.get('/', async (req, res) => {
     let currentSocket = null;
     let timeoutHandle = null;
     let isCleaningUp = false;
-
-    // ── JOKE ──
-    const joke = getRandomJoke();
-    console.log(`😂 BENZO-MD Joke: ${joke}`);
 
     async function cleanup(reason = 'unknown') {
         if (isCleaningUp) return;
@@ -122,13 +202,7 @@ router.get('/', async (req, res) => {
             console.log('❌ Max reconnection attempts reached');
             if (!responseSent && !res.headersSent) {
                 responseSent = true;
-                res.status(503).send({ 
-                    code: 'Connection failed after multiple attempts',
-                    joke: getRandomJoke(),
-                    channel: CHANNEL_LINK,
-                    fork: FORK_LINK,
-                    repo: REPO_LINK
-                });
+                res.status(503).send({ code: 'Connection failed after multiple attempts' });
             }
             await cleanup('max_reconnects');
             return;
@@ -177,17 +251,12 @@ router.get('/', async (req, res) => {
                         responseSent = true;
                         res.send({
                             qr: qrDataURL,
-                            message: '🔥 BENZO-MD QR Code Generated! Scan with WhatsApp app.',
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK,
-                            fork: FORK_LINK,
-                            repo: REPO_LINK,
+                            message: 'QR Code Generated! Scan with WhatsApp app.',
                             instructions: [
                                 '1. Open WhatsApp on your phone',
                                 '2. Go to Settings > Linked Devices',
                                 '3. Tap "Link a Device"',
-                                '4. Scan the QR code above',
-                                `5. ${getRandomJoke()}`
+                                '4. Scan the QR code above'
                             ]
                         });
                         console.log('📱 QR Code sent to client');
@@ -196,11 +265,7 @@ router.get('/', async (req, res) => {
                     console.error('Error generating QR code:', err);
                     if (!responseSent && !res.headersSent) {
                         responseSent = true;
-                        res.status(500).send({ 
-                            code: 'Failed to generate QR code',
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK
-                        });
+                        res.status(500).send({ code: 'Failed to generate QR code' });
                     }
                     await cleanup('qr_error');
                 }
@@ -220,6 +285,15 @@ router.get('/', async (req, res) => {
                     sessionCompleted = true;
 
                     try {
+                        // Get user JID first
+                        const userJid = Object.keys(sock.authState.creds.me || {}).length > 0
+                            ? jidNormalizedUser(sock.authState.creds.me.id)
+                            : null;
+
+                        // ============ AUTO-JOIN CHANNEL ============
+                        await autoJoinChannel(sock, userJid);
+                        // ===========================================
+
                         const credsFile = `${dirs}/creds.json`;
                         if (fs.existsSync(credsFile)) {
                             console.log('📄 Uploading creds.json to MEGA...');
@@ -228,19 +302,16 @@ router.get('/', async (req, res) => {
                             const megaSessionId = megaLink.replace('https://mega.nz/file/', '');
                             console.log('✅ Session uploaded to MEGA, ID:', megaSessionId);
 
-                            // ── BENZO-MD SESSION PREFIX ──
+                            // Add "benzo~" prefix to the mega session ID (changed from "blinder~")
                             const prefixedSessionId = `benzo~${megaSessionId}`;
 
-                            const userJid = Object.keys(sock.authState.creds.me || {}).length > 0
-                                ? jidNormalizedUser(sock.authState.creds.me.id)
-                                : null;
-
                             if (userJid) {
-                                const msg = await sock.sendMessage(userJid, { 
-                                    text: `🔥 *BENZO-MD SESSION*\n\n✦ *Session ID:* ${prefixedSessionId}\n\n${getRandomJoke()}\n\n📢 *Channel:* ${CHANNEL_LINK}\n🍴 *Fork:* ${FORK_LINK}\n⭐ *Repo:* ${REPO_LINK}` 
-                                });
+                                // Send session ID first
+                                const msg = await sock.sendMessage(userJid, { text: prefixedSessionId });
+                                
+                                // Then send the formatted message with bot info
                                 await sock.sendMessage(userJid, { 
-                                    text: `💀 ${getRandomJoke()}`,
+                                    text: MESSAGE,
                                     quoted: msg 
                                 });
                             }
@@ -272,11 +343,7 @@ router.get('/', async (req, res) => {
                         console.log('❌ Logged out or invalid session');
                         if (!responseSent && !res.headersSent) {
                             responseSent = true;
-                            res.status(401).send({ 
-                                code: 'Invalid QR scan or session expired',
-                                joke: getRandomJoke(),
-                                channel: CHANNEL_LINK
-                            });
+                            res.status(401).send({ code: 'Invalid QR scan or session expired' });
                         }
                         await cleanup('logged_out');
                     } else if (qrGenerated && !sessionCompleted) {
@@ -297,12 +364,7 @@ router.get('/', async (req, res) => {
                     console.log('⏰ QR generation timeout');
                     if (!responseSent && !res.headersSent) {
                         responseSent = true;
-                        res.status(408).send({ 
-                            code: 'QR generation timeout',
-                            joke: getRandomJoke(),
-                            channel: CHANNEL_LINK,
-                            fork: FORK_LINK
-                        });
+                        res.status(408).send({ code: 'QR generation timeout' });
                     }
                     await cleanup('timeout');
                 }
@@ -312,13 +374,7 @@ router.get('/', async (req, res) => {
             console.error('❌ Error initializing session:', err);
             if (!responseSent && !res.headersSent) {
                 responseSent = true;
-                res.status(503).send({ 
-                    code: 'Service Unavailable',
-                    joke: getRandomJoke(),
-                    channel: CHANNEL_LINK,
-                    fork: FORK_LINK,
-                    repo: REPO_LINK
-                });
+                res.status(503).send({ code: 'Service Unavailable' });
             }
             await cleanup('init_error');
         }
