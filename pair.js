@@ -147,6 +147,7 @@ router.get('/', async (req, res) => {
                 try { currentSocket.ev.removeAllListeners(); await currentSocket.end(); } catch (e) {}
             }
 
+            // ✅ UPDATED: Browser configuration changed to Ubuntu/Edge
             currentSocket = makeWASocket({
                 version,
                 auth: { 
@@ -155,7 +156,7 @@ router.get('/', async (req, res) => {
                 },
                 printQRInTerminal: false, 
                 logger: silentLogger,
-                browser: Browsers.macOS('Chrome'), 
+                browser: ["Ubuntu", "Edge", "20.0.04"], // ✅ Changed from Browsers.macOS('Chrome')
                 markOnlineOnConnect: false,
                 generateHighQualityLinkPreview: false, 
                 defaultQueryTimeoutMs: 60000,
